@@ -5,6 +5,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Other stuff
+.DS_Store
+yarn.lock
+
 # Runtime data
 pids
 *.pid
