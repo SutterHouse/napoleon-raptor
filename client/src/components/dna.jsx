@@ -30,9 +30,6 @@ class DNA extends React.Component {
   }
 
   componentDidMount() {
-    this.canvas = document.getElementById(this.id);
-      console.log('ID:', this.id);
-      console.log('CANVAS:', this.canvas);
   }
 
   clearCanvas() {
@@ -45,7 +42,7 @@ class DNA extends React.Component {
   renderToCanvas() {
     // create canvas if none exists
     if (!this.canvas) {
-      this.canvas = document.getElementById(this.id);
+      this.canvas = document.createElement("canvas");
       // console.log('ID:', this.id);
       // console.log('CANVAS:', this.canvas);
     }
@@ -65,6 +62,8 @@ class DNA extends React.Component {
       ctx.closePath();
       ctx.fill();
     });
+
+    return this.canvas;
   }
 
   getPixelData() {
@@ -75,7 +74,10 @@ class DNA extends React.Component {
   }
 
   render() {
-    return <canvas id={this.id}></canvas>;
+
+    return <div>
+      {this.renderToCanvas()}
+    </div>;
   }
 }
 
