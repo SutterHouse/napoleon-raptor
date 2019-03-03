@@ -1,5 +1,6 @@
 import gaussian from 'gaussian';
 import _ from 'lodash';
+import DNA from '../components/dna';
 
 class DNAService {
     constructor(settings) {
@@ -101,6 +102,11 @@ class DNAService {
       var removalIndex = Math.floor(Math.random() * polygon.length);
       polygon.coordinates.splice(removalIndex, 1);
     }
+  }
+
+  getPixelData(dna, canvas) {
+      const ctx = canvas.getContext('2d');
+      dna.diffScore = [...ctx.getImageData(0, 0, this.settings.imageWidth, this.settings.imageHeight).data];
   }
 };
 
