@@ -1,23 +1,22 @@
-
+import gaussian from 'gaussian';
+import _ from 'lodash';
 
 class DNAService {
-    constructor(imageWidth, imageHeight) {
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
+    constructor(settings) {
+        this.settings = settings;
     }
 
-    populate() {
-    this.polygons = _.times(this.dnaPolygonCount, () => ({
-      coordinates: _.times(this.dnaVertexCount, this.createVertex.bind(this)),
+    populate(dna) {
+    dna.polygons = _.times(this.settings.dnaPolygonCount, () => ({
+      coordinates: _.times(this.settings.dnaVertexCount, this.createVertex(this.settings.imageWidth, this.settings.imageHeight)),
       color: this.createColor(),
     }));
-    
-    // so that we can create a new populated DNA via `new DNA().populate()`
-    return this;
+
+    return dna;
   }
   
-  mutate() {
-    this.polygons.forEach((polygon) => {
+  mutate(dna) {
+    dna.polygons.forEach((polygon) => {
       polygon.coordinates.forEach((coordinate) => {
         this.mutateCoordinate(coordinate);
       });
@@ -29,8 +28,8 @@ class DNAService {
     });
   }
 
-  createVertex() {
-    return { x: _.random(this.imageWidth), y: _.random(this.imageHeight) };
+  createVertex(width, height) {
+    return { x: _.random(width), y: _.random(height) };
   }
 
   createColor() {
@@ -45,7 +44,7 @@ class DNAService {
     // should mutation occur?
     const p = Math.random();
     let result = original;
-    if (p <= this.dnaMutationProbability) {
+    if (p <= this.settings.dnaMutationProbability) {
       // choose perturbation from a normal dist and apply to original value
       
       // we want most mutations to fall between min and max
@@ -70,8 +69,8 @@ class DNAService {
   }
 
   mutateCoordinate(coordinate) {
-    coordinate.x = this.mutateValue(coordinate.x, 0, this.imageWidth);
-    coordinate.y = this.mutateValue(coordinate.y, 0, this.imageHeight);
+    coordinate.x = this.mutateValue(coordinate.x, 0, this.settings.imageWidth);
+    coordinate.y = this.mutateValue(coordinate.y, 0, this.settings.imageHeight);
   }
 
   mutateColor(color) {
@@ -82,7 +81,7 @@ class DNAService {
 
   mutateNumberOfVertices (polygon) {
     var pMutate = Math.random();
-    if (pMutate < this.dnaMutationProbability) {
+    if (pMutate < this.settings.dnaMutationProbability) {
       var pAdd = Math.random();
       if (pAdd >= 0.5) {
         this.addVertex(polygon);
@@ -104,3 +103,5 @@ class DNAService {
     }
   }
 };
+
+export default DNAService;

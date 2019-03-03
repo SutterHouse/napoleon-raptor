@@ -1,7 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
 import DNA from './dna.jsx';
-import { pixelDiff } from '../services/imageService';
+import { pixelDiff } from '../services/imageService.js';
+import DNAService from '../services/dnaService.js';
 import axios from 'axios';
 import config from '../config';
 
@@ -10,10 +11,21 @@ class GenePool extends React.Component {
     super(props);
 
     // config vars
-    this.genePoolPopulationSize = config.genePool.populationSize;
-    this.genePoolMatingProbability = config.genePool.matingProbability;
-    this.genePoolMaxAge = config.genePool.maxAge;
-    this.genePoolImmigrantsPerEpoch = config.genePool.immigrantsPerEpoch;
+    this.settings = {
+      projectName:                config.projectName,
+      genePoolPopulationSize:     config.genePool.populationSize,
+      genePoolMatingProbability:  config.genePool.matingProbability,
+      genePoolMaxAge:             config.genePool.maxAge,
+      genePoolImmigrantsPerEpoch: config.genePool.immigrantsPerEpoch,
+      dnaPolygonCount:            config.dna.polygonCount,
+      dnaVertexCount:             config.dna.vertexCount,
+      imageWidth:                 config.image.width,
+      imageHeight:                config.image.height,
+      dnaMutationProbability:     config.dna.mutationProbability,
+      dnaPolygonAlpha:            config.dna.polygonAlpha
+    }
+
+    this.dnaService = new DNAService(this.settings);
 
     // mutable vars
     if (props && props.data) {
