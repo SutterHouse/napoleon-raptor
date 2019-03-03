@@ -7,6 +7,18 @@ class DNAService {
         this.settings = settings;
     }
 
+    createDNAEgg() {
+        const dna = {};
+        dna.polygons = [];
+        dna.id = _.uniqueId();
+    }
+
+    createDNA() {
+        const dna = {};
+        dna.id = _.uniqueId();
+        return this.populate(dna);
+    }
+
     populate(dna) {
     dna.polygons = _.times(this.settings.dnaPolygonCount, () => ({
       coordinates: _.times(this.settings.dnaVertexCount, this.createVertex(this.settings.imageWidth, this.settings.imageHeight)),
@@ -14,6 +26,32 @@ class DNAService {
     }));
 
     return dna;
+  }
+
+  mate (dna1, dna2) {
+    var child = createDNAEgg();
+    for (var i = 0; i < dna1.polygons.length; i++) {
+      var p = Math.random();
+      if (p < 0.5) {
+        child.polygons.push(_.cloneDeep(dna1.polygons[i]));
+      } else {
+        child.polygons.push(_.cloneDeep(dna2.polygons[i]));
+      }
+    }
+    return child;
+  }
+
+  matingSeason (dnas) {
+    const children = [];
+    for (var i = 0; i < dnas.length; i++) {
+      for (var j = 0; j < dnas.length; j++) {
+        if (Math.random() < this.settings.genePoolMatingProbability) {
+          children.push(this.mate(dnas[i], dnas[j]))
+        }
+      }
+    }
+
+    return children;
   }
   
   mutate(dna) {

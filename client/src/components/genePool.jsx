@@ -37,7 +37,7 @@ class GenePool extends React.Component {
       }
     } else {
       this.state = {
-        dnas: _.times(this.genePoolPopulationSize, () => new DNA().populate())
+        dnas: _.times(this.genePoolPopulationSize, () => this.dnaService.createDNA())
       }
     }
     console.log('STATE:', this.state);
@@ -61,28 +61,8 @@ class GenePool extends React.Component {
     });
   }
 
-  mate (dna1, dna2) {
-    var child = new DNA();
-    for (var i = 0; i < dna1.polygons.length; i++) {
-      var p = Math.random();
-      if (p < 0.5) {
-        child.polygons.push(_.cloneDeep(dna1.polygons[i]));
-      } else {
-        child.polygons.push(_.cloneDeep(dna2.polygons[i]));
-      }
-    }
-    return child;
-  }
-
   initiateMatingSeason () {
-    const children = [];
-    for (var i = 0; i < this.state.dnas.length; i++) {
-      for (var j = 0; j < this.state.dnas.length; j++) {
-        if (Math.random() < this.settings.genePoolMatingProbability) {
-          children.push(this.mate(this.state.dnas[i], this.state.dnas[j]))
-        }
-      }
-    }
+    const children = dnaService.matingSeason(this.state.dnas);
 
     this.setState((prevState, props) => {
       var newPopulation = prevState.dnas.push(...children);
