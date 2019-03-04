@@ -5,6 +5,7 @@ import { pixelDiff } from '../services/imageService.js';
 import DNAService from '../services/dnaService.js';
 import axios from 'axios';
 import config from '../config';
+require("babel-polyfill");
 
 class GenePool extends React.Component {
   constructor(props) {
@@ -14,6 +15,7 @@ class GenePool extends React.Component {
     this.settings = {
       projectName:                config.projectName,
       genePoolPopulationSize:     config.genePool.populationSize,
+      dnaRenderCount:             config.dnaRenderCount,
       genePoolMatingProbability:  config.genePool.matingProbability,
       genePoolMaxAge:             config.genePool.maxAge,
       genePoolImmigrantsPerEpoch: config.genePool.immigrantsPerEpoch,
@@ -30,17 +32,47 @@ class GenePool extends React.Component {
     this.canvases = {};
 
     // mutable vars
-    if (props && props.data) {
-      this.imageId = props.data.imageId;
-      this.state = {
-        dnas: props.data.state.dnas
-      }
-    } else {
-      this.state = {
-        dnas: _.times(this.genePoolPopulationSize, () => this.dnaService.createDNA())
-      }
+    const { imageId } = props;
+    this.imageId = imageId;
+    this.dnas = _.times(this.settings.genePoolPopulationSize, () => this.dnaService.createDNA());
+  }
+
+  async componentDidMount() {
+    await this.getSourceImagePixels();
+      
+    let epochIdx = 0;
+    window.setInterval(() => {
+      epochIdx++;
+      if (epochIdx >= config.epochCount) { return; }
+      this.advanceEpoch(epochIdx);
+    }, 0);
+  }
+
+  advanceEpoch(epochIdx) {
+    // change genetic code
+    console.log('MUTATEALL');
+    this.mutateAll();
+    console.log('RENDER');
+    console.log('CANVASES:', this.canvases);
+    // this.incrementAges();
+    // this.reapTheElderly();
+    console.log('MATE');
+    this.initiateMatingSeason();
+
+    // post-render methods
+    console.log('RENDER');
+    console.log('CALCULATE DIFFS');
+    this.calculateDiffs();
+    console.log('SORTBYDIFF');
+    this.sortDnasByDiff();
+    console.log('CULL');
+    this.cullAll();
+    this.renderDNAs();
+    if (epochIdx % 10 === 0) {
+      // this.writeFittestToFile(epochIdx);
+      console.log(`epoch: ${epochIdx}, minDiff: ${this.dnas[0].diffScore}`)
     }
-    console.log('STATE:', this.state);
+    // this.introduceImmigrants(); // decide if we want to use this
   }
 
   getSourceImagePixels() {  // async
@@ -50,60 +82,57 @@ class GenePool extends React.Component {
   }
 
   calculateDiffs () {
-    this.state.dnas.forEach((dna) => {
-      dnaService.calculateDiff(dna, this.canvases[dna.id]);
+    console.log('DNAS:', this.dnas);
+    this.dnas.forEach((dna) => {
+      this.dnaService.calculateDiff(dna, this.sourceImagePixels);
     });
   }
 
   sortDnasByDiff () {
-    this.state.dnas.sort((dna1, dna2) => {
+    this.dnas.sort((dna1, dna2) => {
       return dna1.diffScore - dna2.diffScore;
     });
   }
 
   initiateMatingSeason () {
-    const children = dnaService.matingSeason(this.state.dnas);
-
-    this.setState((prevState, props) => {
-      var newPopulation = prevState.dnas.push(...children);
-      console.log('PREVSTATE:', prevState);
-      console.log('props:', props);
-      return {
-        dnas: newPopulation
-      };
-    });
+    const children = this.dnaService.matingSeason(this.dnas);
+    this.dnas = _.concat(this.dnas, children);
   }
 
   incrementAges () {
-    // this.state.dnas.forEach((dna) => {
+    // this.dnas.forEach((dna) => {
     //   dna.age++;
     // });
   }
 
   reapTheElderly() {
-    // this.state.dnas = this.state.dnas.filter((dna) => {
+    // this.dnas = this.dnas.filter((dna) => {
     //   return dna.age <= this.genePoolMaxAge;
     // });
   }
 
   cullAll () {
-    this.state.dnas = this.state.dnas.slice(0, this.genePoolPopulationSize);
+    this.dnas = this.dnas.slice(0, this.settings.genePoolPopulationSize);
   }
 
   mutateAll () {
-    this.state.dnas.forEach(dna => dna.mutate());
+    this.dnas.forEach(dna => this.dnaService.mutate(dna));
   }
 
   introduceImmigrants () {
     // const numberOfImmigrants = Math.floor(this.settings.genePoolPopulationSize * this.settings.genePoolImmigrantsPerEpoch);
     // this.setState({
-    //   dnas: this.state.dnas.push(..._.times(numberOfImmigrants, () => new DNA().populate()))
+    //   dnas: this.dnas.push(..._.times(numberOfImmigrants, () => new DNA().populate()))
     // });
+  }
+
+  renderDNAs() {
+    _.times(this.settings.dnaRenderCount, (n) => this.dnaService.renderDna(this.dnas[n], this.canvases[n]));
   }
 
   render() {
     return <div>
-      {_.map(this.state.dnas, (dna) => <DNA data={dna} />)}
+      {_.times(this.settings.dnaRenderCount, (n) => <canvas ref={(ref) => this.canvases[n] = ref} key={n}/>)}
     </div>
   }
 

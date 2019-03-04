@@ -21,7 +21,6 @@ const advanceEpoch = (genePool, epochIdx) => {
   genePool.initiateMatingSeason();
   
   // post-render methods
-  genePool.renderDnas();
   genePool.calculateDiffs();
   genePool.sortDnasByDiff();
   genePool.cullAll();

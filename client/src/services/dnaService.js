@@ -1,6 +1,5 @@
 import gaussian from 'gaussian';
 import _ from 'lodash';
-import DNA from '../components/dna';
 
 class DNAService {
     constructor(settings) {
@@ -11,6 +10,7 @@ class DNAService {
         const dna = {};
         dna.polygons = [];
         dna.id = _.uniqueId();
+        return dna;
     }
 
     createDNA() {
@@ -20,8 +20,9 @@ class DNAService {
     }
 
     populate(dna) {
+    debugger;
     dna.polygons = _.times(this.settings.dnaPolygonCount, () => ({
-      coordinates: _.times(this.settings.dnaVertexCount, this.createVertex(this.settings.imageWidth, this.settings.imageHeight)),
+      coordinates: _.times(this.settings.dnaVertexCount, () => this.createVertex(this.settings.imageWidth, this.settings.imageHeight)),
       color: this.createColor(),
     }));
 
@@ -29,7 +30,7 @@ class DNAService {
   }
 
   mate (dna1, dna2) {
-    var child = createDNAEgg();
+    var child = this.createDNAEgg();
     for (var i = 0; i < dna1.polygons.length; i++) {
       var p = Math.random();
       if (p < 0.5) {
@@ -131,7 +132,7 @@ class DNAService {
   }
 
   addVertex (polygon) {
-    var newVertex = this.createVertex();
+    var newVertex = this.createVertex(this.settings.imageWidth, this.settings.imageHeight);
     polygon.coordinates.push(newVertex);
   }
 
@@ -142,9 +143,61 @@ class DNAService {
     }
   }
 
-  getPixelData(dna, canvas) {
-      const ctx = canvas.getContext('2d');
-      dna.diffScore = [...ctx.getImageData(0, 0, this.settings.imageWidth, this.settings.imageHeight).data];
+  calculateDiff(dna, sourcePixels) {
+    var canvas = document.createElement("canvas");
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fillRect(0, 0, this.settings.imageWidth, this.settings.imageHeight);
+    
+    dna.polygons.forEach((polygon) => {
+    ctx.fillStyle = `rgba(${polygon.color.r}, ${polygon.color.g}, ${polygon.color.b}, ${this.settings.dnaPolygonAlpha})`;
+    ctx.beginPath();
+    ctx.moveTo(polygon.coordinates[0].x, polygon.coordinates[0].y);
+    for (var i = 1; i < polygon.coordinates.length; i++) {
+        ctx.lineTo(polygon.coordinates[i].x, polygon.coordinates[i].y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    });
+
+    const dnaPixels = [...ctx.getImageData(0, 0, this.settings.imageWidth, this.settings.imageHeight).data];
+    return dnaPixels.reduce((score, current, idx) => {
+        return score + Math.pow(current - sourcePixels[idx], 2);
+    }, 0);
+  }
+
+  renderDna(dna, canvas) {
+    // create canvas if none exists
+    // if (!this.canvas) {
+    //   this.canvas = document.getElementById(this.id);
+    //   // const { canvasRef } = this.props;
+    //   // this.canvas = <canvas id={this.id} ref={canvasRef} />;
+    //   // console.log('ID:', this.id);
+    //   // console.log('CANVAS:', this.canvas);
+    //   console.log('CANVAS:', this.canvas);
+    // }
+    console.log('RENDER-DNA:', dna);
+    console.log('RENDER-CANVAS:', canvas);
+    if (!canvas) {
+        return null;
+    }
+
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fillRect(0, 0, this.settings.imageWidth, this.settings.imageHeight);
+    
+    dna.polygons.forEach((polygon) => {
+      ctx.fillStyle = `rgba(${polygon.color.r}, ${polygon.color.g}, ${polygon.color.b}, ${this.settings.dnaPolygonAlpha})`;
+      ctx.beginPath();
+      ctx.moveTo(polygon.coordinates[0].x, polygon.coordinates[0].y);
+      for (var i = 1; i < polygon.coordinates.length; i++) {
+        ctx.lineTo(polygon.coordinates[i].x, polygon.coordinates[i].y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    });
   }
 };
 

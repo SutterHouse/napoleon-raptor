@@ -1,5 +1,4 @@
 import React from 'react';
-import gaussian from 'gaussian';
 import _ from 'lodash';
 import config from '../config.js';
 
@@ -19,17 +18,6 @@ class DNA extends React.Component {
       this.diffScore = null;
     }
     this.age = 0;
-    // config vars
-    this.dnaPolygonCount = config.dna.polygonCount;
-    this.dnaVertexCount = config.dna.vertexCount;
-    this.imageWidth = config.image.width;
-    this.imageHeight = config.image.height;
-    this.dnaMutationProbability = config.dna.mutationProbability;
-    this.dnaPolygonAlpha = config.dna.polygonAlpha;
-    this.projectName = config.projectName;
-  }
-
-  componentDidMount() {
   }
 
   clearCanvas() {
@@ -39,45 +27,9 @@ class DNA extends React.Component {
     }
   }
 
-  renderToCanvas() {
-    // create canvas if none exists
-    if (!this.canvas) {
-      this.canvas = document.createElement("canvas");
-      // console.log('ID:', this.id);
-      // console.log('CANVAS:', this.canvas);
-    }
-
-    const ctx = this.canvas.getContext('2d');
-
-    ctx.fillStyle = 'rgba(0,0,0,1)';
-    ctx.fillRect(0, 0, this.imageWidth, this.imageHeight);
-    
-    this.polygons.forEach((polygon) => {
-      ctx.fillStyle = `rgba(${polygon.color.r}, ${polygon.color.g}, ${polygon.color.b}, ${this.dnaPolygonAlpha})`;
-      ctx.beginPath();
-      ctx.moveTo(polygon.coordinates[0].x, polygon.coordinates[0].y);
-      for (var i = 1; i < polygon.coordinates.length; i++) {
-        ctx.lineTo(polygon.coordinates[i].x, polygon.coordinates[i].y);
-      }
-      ctx.closePath();
-      ctx.fill();
-    });
-
-    return this.canvas;
-  }
-
-  getPixelData() {
-    if (this.canvas) {
-      const ctx = this.canvas.getContext('2d');
-      return [...ctx.getImageData(0, 0, this.imageWidth, this.imageHeight).data];
-    }
-  }
-
   render() {
-
-    return <div>
-      {this.renderToCanvas()}
-    </div>;
+    const { canvasRef } = this.props;
+    return <canvas id={this.id} ref={canvasRef} />
   }
 }
 
