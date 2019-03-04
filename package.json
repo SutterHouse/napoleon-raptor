@@ -1,0 +1,32 @@
+{
+  "scripts": {
+    "dev": "nodemon server/server.js",
+    "build": "webpack",
+    "build-dev": "webpack --watch"
+  },
+  "dependencies": {
+    "@babel/core": "^7.3.3",
+    "@babel/preset-react": "^7.0.0",
+    "axios": "^0.18.0",
+    "babel-polyfill": "^6.26.0",
+    "bluebird": "^3.5.1",
+    "express": "^4.16.3",
+    "express-fileupload": "^1.1.1-alpha.3",
+    "fs": "^0.0.1-security",
+    "gaussian": "^1.1.0",
+    "js-base64": "^2.4.3",
+    "png-js": "^0.1.1",
+    "pngjs": "^3.3.3",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
+    "morgan": "^1.9.0",
+    "nodemon": "^1.18.10",
+    "path": "^0.12.7",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3"
+  }
+}
